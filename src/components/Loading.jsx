@@ -1,8 +1,13 @@
-export default function Loading({ message = 'Memuat film...' }) {
+/**
+ * Displays a centered loading spinner with a status label.
+ */
+function Loading({ message = 'Memuat data...' }) {
   return (
-    <div className="status-message">
-      <div className="loader"></div>
+    <div className="status-message" role="status" aria-live="polite">
+      <div className="loader" aria-hidden="true"></div>
       <p>{message}</p>
     </div>
   )
 }
+
+export default Loading
