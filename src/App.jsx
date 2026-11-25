@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import MovieDetail from './pages/MovieDetail'
 import NowPlaying from './pages/NowPlaying'
 import Search from './pages/Search'
+import TopRated from './pages/TopRated'
 import Upcoming from './pages/Upcoming'
 import Genre from './pages/Genre'
 import './App.css'
@@ -34,6 +35,10 @@ function parseHashRoute(hash) {
     return { name: 'upcoming', sectionId: '' }
   }
 
+  if (cleaned === '/top-rated' || cleaned === 'top-rated') {
+    return { name: 'top-rated', sectionId: '' }
+  }
+
   if (cleaned === '/genres' || cleaned === 'genres') {
     return { name: 'genres', sectionId: '' }
   }
@@ -59,6 +64,7 @@ const ROUTE_HASH_MAP = {
   home: '#/',
   'now-playing': '#/now-playing',
   upcoming: '#/upcoming',
+  'top-rated': '#/top-rated',
   genres: '#/genres',
   search: '#/search',
 }
@@ -122,6 +128,10 @@ function App() {
 
       {route.name === 'upcoming' && (
         <Upcoming onSelectMovie={handleSelectMovie} />
+      )}
+
+      {route.name === 'top-rated' && (
+        <TopRated onSelectMovie={handleSelectMovie} />
       )}
 
       {route.name === 'genres' && (

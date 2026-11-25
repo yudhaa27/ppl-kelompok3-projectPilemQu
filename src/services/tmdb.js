@@ -55,6 +55,10 @@ export function getUpcomingMovies(page = 1, options = {}) {
   return fetchFromTMDB(`/movie/upcoming?page=${page}`, options)
 }
 
+export function getTopRatedMovies(page = 1, options = {}) {
+  return fetchFromTMDB(`/movie/top_rated?page=${page}`, options)
+}
+
 export function searchMovies(query, page = 1, options = {}) {
   const trimmedQuery = typeof query === 'string' ? query.trim() : ''
   if (!trimmedQuery) {
