@@ -13,7 +13,7 @@ function Home() {
   useEffect(() => {
     const controller = new AbortController()
 
-    getPopularMovies({ signal: controller.signal })
+    getPopularMovies(1, { signal: controller.signal })
       .then((data) => {
         setMovies(data.results || [])
       })
@@ -90,8 +90,8 @@ function Home() {
                 Lihat Detail <span>→</span>
               </a>
 
-              <a href="#/search" className="button-secondary">
-                Cari Film Lain
+              <a href="#/now-playing" className="button-secondary">
+                Now Playing
               </a>
             </div>
           </div>
@@ -126,8 +126,8 @@ function Home() {
               <p>Explore movies everyone is talking about.</p>
             </div>
 
-            <a href="#/search" className="view-all">
-              Search Movies <span>→</span>
+            <a href="#/now-playing" className="view-all">
+              Now Playing <span>→</span>
             </a>
           </div>
 
@@ -148,12 +148,13 @@ function Home() {
             <span className="section-label">YOUR NEXT STORY</span>
             <h2>Every movie has a story. Find yours.</h2>
             <p>
-              Discover movies across genres and search your favorite titles.
+              Discover movies currently in theaters, coming soon, or search your
+              favorite titles.
             </p>
           </div>
 
-          <a href="#/search" className="button-primary">
-            Start Searching <span>→</span>
+          <a href="#/upcoming" className="button-primary">
+            Lihat Upcoming <span>→</span>
           </a>
         </section>
       </main>

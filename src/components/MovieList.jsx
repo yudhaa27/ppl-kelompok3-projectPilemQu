@@ -1,7 +1,29 @@
+import ErrorMessage from './ErrorMessage'
+import Loading from './Loading'
 import MovieCard from './MovieCard'
 
-function MovieList({ movies = [], emptyMessage = 'Tidak ada film yang tersedia.' }) {
-  if (!movies.length) {
+/**
+ * Renders loading, error, empty, or movie grid states consistently across catalog views.
+ */
+function MovieList({
+  movies = [],
+  loading = false,
+  error = '',
+  onRetry,
+  loadingMessage,
+  emptyMessage = 'Tidak ada film yang tersedia.',
+  showFullDate = false,
+  onSelectMovie,
+}) {
+  if (loading) {
+    return <Loading message={loadingMessage} />
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} onRetry={onRetry} />
+  }
+
+  if (!movies || movies.length === 0) {
     return (
       <div className="status-message">
         <p>{emptyMessage}</p>
@@ -12,7 +34,12 @@ function MovieList({ movies = [], emptyMessage = 'Tidak ada film yang tersedia.'
   return (
     <div className="movie-grid">
       {movies.map((movie) => (
-        <MovieCard key={movie.id} movie={movie} />
+        <MovieCard
+          key={movie.id}
+          movie={movie}
+          showFullDate={showFullDate}
+          onSelect={onSelectMovie}
+        />
       ))}
     </div>
   )

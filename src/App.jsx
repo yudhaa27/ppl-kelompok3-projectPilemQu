@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import MovieDetail from './pages/MovieDetail'
+import NowPlaying from './pages/NowPlaying'
 import Search from './pages/Search'
+import Upcoming from './pages/Upcoming'
 import './App.css'
 
 function parseHashRoute(hash) {
@@ -23,6 +25,14 @@ function parseHashRoute(hash) {
     return { name: 'detail', movieId: movieMatch[1], sectionId: '' }
   }
 
+  if (cleaned === '/now-playing' || cleaned === 'now-playing') {
+    return { name: 'now-playing', sectionId: '' }
+  }
+
+  if (cleaned === '/upcoming' || cleaned === 'upcoming') {
+    return { name: 'upcoming', sectionId: '' }
+  }
+
   const sectionMatch = cleaned.match(/^\/#(.+)$/)
   return {
     name: 'home',
@@ -38,6 +48,13 @@ function buildSearchHash(query, page = 1) {
     params.set('page', String(page))
   }
   return `#/search?${params.toString()}`
+}
+
+const ROUTE_HASH_MAP = {
+  home: '#/',
+  'now-playing': '#/now-playing',
+  upcoming: '#/upcoming',
+  search: '#/search',
 }
 
 function App() {
@@ -63,8 +80,22 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
+  const navigateTo = (pageId) => {
+    const targetHash = ROUTE_HASH_MAP[pageId] || '#/'
+    if (window.location.hash !== targetHash) {
+      window.location.hash = targetHash
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const handleSearchNavigate = (query, page = 1) => {
     window.location.hash = buildSearchHash(query, page)
+  }
+
+  const handleSelectMovie = (movie) => {
+    if (!movie?.id) return
+    window.location.hash = `#/movie/${movie.id}`
   }
 
   const handleBack = () => {
@@ -77,7 +108,15 @@ function App() {
 
   return (
     <div className="app">
-      <Navbar currentRoute={route.name} />
+      <Navbar activePage={route.name} onNavigate={navigateTo} />
+
+      {route.name === 'now-playing' && (
+        <NowPlaying onSelectMovie={handleSelectMovie} />
+      )}
+
+      {route.name === 'upcoming' && (
+        <Upcoming onSelectMovie={handleSelectMovie} />
+      )}
 
       {route.name === 'search' && (
         <Search
@@ -98,8 +137,15 @@ function App() {
 
       {route.name === 'home' && <Home />}
 
-      <footer className="footer" id="upcoming">
-        <a href="#/" className="logo">
+      <footer className="footer">
+        <a
+          href="#/"
+          className="logo"
+          onClick={(event) => {
+            event.preventDefault()
+            navigateTo('home')
+          }}
+        >
           Pilem<span>Qu.</span>
         </a>
 

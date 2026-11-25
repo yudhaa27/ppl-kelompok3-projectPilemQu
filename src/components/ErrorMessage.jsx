@@ -1,5 +1,8 @@
+/**
+ * Displays an error state with an optional retry action and extra actions.
+ */
 function ErrorMessage({
-  message = 'Terjadi kesalahan saat memuat data.',
+  message = 'Gagal memuat data film.',
   onRetry,
   retryLabel = 'Coba Lagi',
   children,
@@ -12,7 +15,7 @@ function ErrorMessage({
           {onRetry && (
             <button
               type="button"
-              className="button-secondary status-button"
+              className="button-secondary retry-button status-button"
               onClick={onRetry}
             >
               {retryLabel}

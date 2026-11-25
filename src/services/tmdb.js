@@ -1,14 +1,16 @@
 const BASE_URL = 'https://api.themoviedb.org/3'
 
 export const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/'
+export const TMDB_IMAGE_BASE = IMAGE_BASE_URL
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
-export function getImageUrl(path, size = 'w500') {
-  if (!path) return null
-  return `${IMAGE_BASE_URL}${size}${path}`
-}
-
+/**
+ * Fetches JSON data from a TMDB v3 endpoint using the configured API key.
+ * @param {string} endpoint - Relative TMDB endpoint path (e.g. '/movie/popular?page=1').
+ * @param {object} [options] - Optional fetch options (e.g. AbortController signal).
+ * @returns {Promise<object>} Parsed JSON response from TMDB.
+ */
 async function fetchFromTMDB(endpoint, options = {}) {
   if (!API_KEY) {
     throw new Error('TMDB API Key belum dikonfigurasi.')
@@ -29,8 +31,27 @@ async function fetchFromTMDB(endpoint, options = {}) {
   return response.json()
 }
 
-export function getPopularMovies(options = {}) {
-  return fetchFromTMDB('/movie/popular?page=1', options)
+/**
+ * Builds a full TMDB image URL for a given path and size.
+ * @param {string | null | undefined} path - Poster or backdrop path from TMDB.
+ * @param {string} [size='w500'] - TMDB image width preset.
+ * @returns {string | null} Full image URL or null when path is unavailable.
+ */
+export function getImageUrl(path, size = 'w500') {
+  if (!path) return null
+  return `${IMAGE_BASE_URL}${size}${path}`
+}
+
+export function getPopularMovies(page = 1, options = {}) {
+  return fetchFromTMDB(`/movie/popular?page=${page}`, options)
+}
+
+export function getNowPlayingMovies(page = 1, options = {}) {
+  return fetchFromTMDB(`/movie/now_playing?page=${page}`, options)
+}
+
+export function getUpcomingMovies(page = 1, options = {}) {
+  return fetchFromTMDB(`/movie/upcoming?page=${page}`, options)
 }
 
 export function searchMovies(query, page = 1, options = {}) {
