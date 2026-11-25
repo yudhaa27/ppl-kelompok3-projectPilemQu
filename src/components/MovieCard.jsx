@@ -20,7 +20,15 @@ function formatReleaseDate(dateString, showFullDate) {
 /**
  * Renders an individual movie card with poster fallback, rating badge, and release metadata.
  */
-function MovieCard({ movie, showFullDate = false, onSelect }) {
+function MovieCard({
+  movie,
+  showFullDate = false,
+  onSelect,
+  isSelected = false,
+  actionLabel = 'Lihat Detail',
+}) {
+  if (!movie) return null
+
   const posterUrl = getImageUrl(movie.poster_path, 'w500')
   const hasRating =
     typeof movie.vote_average === 'number' && movie.vote_average > 0
@@ -33,7 +41,7 @@ function MovieCard({ movie, showFullDate = false, onSelect }) {
   }
 
   return (
-    <article className="movie-card">
+    <article className={`movie-card ${isSelected ? 'selected-card' : ''}`}>
       <a
         href={`#/movie/${movie.id}`}
         className="movie-card-link"
@@ -41,14 +49,18 @@ function MovieCard({ movie, showFullDate = false, onSelect }) {
       >
         <div className="movie-poster">
           {posterUrl ? (
-            <img src={posterUrl} alt={movie.title} loading="lazy" />
+            <img
+              src={posterUrl}
+              alt={movie.title || 'Movie Poster'}
+              loading="lazy"
+            />
           ) : (
             <div className="poster-placeholder">No Poster Available</div>
           )}
 
           <div className="poster-overlay">
             <span className="movie-explore">
-              Lihat Detail <span>↗</span>
+              {actionLabel} <span>↗</span>
             </span>
           </div>
 

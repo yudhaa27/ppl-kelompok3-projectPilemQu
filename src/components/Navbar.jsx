@@ -2,6 +2,7 @@ const NAV_ITEMS = [
   { id: 'home', label: 'Home', href: '#/' },
   { id: 'now-playing', label: 'Now Playing', href: '#/now-playing' },
   { id: 'upcoming', label: 'Upcoming', href: '#/upcoming' },
+  { id: 'genres', label: 'Genres', href: '#/genres' },
   { id: 'search', label: 'Search', href: '#/search' },
 ]
 

@@ -5,6 +5,7 @@ import MovieDetail from './pages/MovieDetail'
 import NowPlaying from './pages/NowPlaying'
 import Search from './pages/Search'
 import Upcoming from './pages/Upcoming'
+import Genre from './pages/Genre'
 import './App.css'
 
 function parseHashRoute(hash) {
@@ -33,6 +34,10 @@ function parseHashRoute(hash) {
     return { name: 'upcoming', sectionId: '' }
   }
 
+  if (cleaned === '/genres' || cleaned === 'genres') {
+    return { name: 'genres', sectionId: '' }
+  }
+
   const sectionMatch = cleaned.match(/^\/#(.+)$/)
   return {
     name: 'home',
@@ -54,6 +59,7 @@ const ROUTE_HASH_MAP = {
   home: '#/',
   'now-playing': '#/now-playing',
   upcoming: '#/upcoming',
+  genres: '#/genres',
   search: '#/search',
 }
 
@@ -116,6 +122,12 @@ function App() {
 
       {route.name === 'upcoming' && (
         <Upcoming onSelectMovie={handleSelectMovie} />
+      )}
+
+      {route.name === 'genres' && (
+        <main className="main-content">
+          <Genre onSelectMovie={handleSelectMovie} />
+        </main>
       )}
 
       {route.name === 'search' && (

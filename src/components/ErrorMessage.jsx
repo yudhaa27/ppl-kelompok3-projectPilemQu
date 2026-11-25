@@ -18,7 +18,7 @@ function ErrorMessage({
               className="button-secondary retry-button status-button"
               onClick={onRetry}
             >
-              {retryLabel}
+              {retryLabel} <span>↺</span>
             </button>
           )}
           {children}

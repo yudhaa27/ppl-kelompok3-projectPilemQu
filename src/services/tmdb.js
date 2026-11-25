@@ -1,6 +1,7 @@
 const BASE_URL = 'https://api.themoviedb.org/3'
 
 export const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/'
+export const IMAGE_BASE = IMAGE_BASE_URL
 export const TMDB_IMAGE_BASE = IMAGE_BASE_URL
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
@@ -13,7 +14,7 @@ const API_KEY = import.meta.env.VITE_TMDB_API_KEY
  */
 async function fetchFromTMDB(endpoint, options = {}) {
   if (!API_KEY) {
-    throw new Error('TMDB API Key belum dikonfigurasi.')
+    throw new Error('TMDB API Key belum dikonfigurasi. Pastikan VITE_TMDB_API_KEY ada di file .env')
   }
 
   const separator = endpoint.includes('?') ? '&' : '?'
@@ -73,4 +74,25 @@ export function getMovieDetail(movieId, options = {}) {
   }
 
   return fetchFromTMDB(`/movie/${encodeURIComponent(movieId)}`, options)
+}
+
+// FR-07: Genre list
+export function getGenres(options = {}) {
+  return fetchFromTMDB('/genre/movie/list', options)
+}
+
+// FR-07: Discover movies by genre
+export function getMoviesByGenre(genreId, page = 1, options = {}) {
+  return fetchFromTMDB(
+    `/discover/movie?with_genres=${genreId}&page=${page}&sort_by=popularity.desc`,
+    options,
+  )
+}
+
+// FR-08: Movie recommendations based on movie ID
+export function getMovieRecommendations(movieId, page = 1, options = {}) {
+  return fetchFromTMDB(
+    `/movie/${encodeURIComponent(movieId)}/recommendations?page=${page}`,
+    options,
+  )
 }
