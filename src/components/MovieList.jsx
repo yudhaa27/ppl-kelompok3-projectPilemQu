@@ -6,12 +6,12 @@ import MovieCard from './MovieCard'
  * Renders loading, error, empty, or movie grid states consistently across catalog views.
  */
 function MovieList({
-  movies,
-  loading,
-  error,
+  movies = [],
+  loading = false,
+  error = '',
   onRetry,
   loadingMessage,
-  emptyMessage = 'No movies available.',
+  emptyMessage = 'Tidak ada film yang tersedia.',
   showFullDate = false,
   onSelectMovie,
 }) {

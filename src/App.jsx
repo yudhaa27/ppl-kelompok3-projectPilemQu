@@ -1,238 +1,145 @@
 import { useEffect, useState } from 'react'
-import MovieList from './components/MovieList'
 import Navbar from './components/Navbar'
+import Home from './pages/Home'
+import MovieDetail from './pages/MovieDetail'
 import NowPlaying from './pages/NowPlaying'
+import Search from './pages/Search'
 import Upcoming from './pages/Upcoming'
-import { getImageUrl, getPopularMovies } from './services/tmdb'
 import './App.css'
 
-function resolvePageFromHash(hash) {
-  if (hash === '#now-playing') return 'now-playing'
-  if (hash === '#upcoming') return 'upcoming'
-  return 'home'
+function parseHashRoute(hash) {
+  const cleaned = (hash || '').replace(/^#/, '')
+
+  if (cleaned.startsWith('/search')) {
+    const [, queryString = ''] = cleaned.split('?')
+    const params = new URLSearchParams(queryString)
+    const query = params.get('q') || ''
+    const parsedPage = Number.parseInt(params.get('page') || '1', 10)
+    const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage
+
+    return { name: 'search', query, page, sectionId: '' }
+  }
+
+  const movieMatch = cleaned.match(/^\/movie\/([^/?]+)/)
+  if (movieMatch) {
+    return { name: 'detail', movieId: movieMatch[1], sectionId: '' }
+  }
+
+  if (cleaned === '/now-playing' || cleaned === 'now-playing') {
+    return { name: 'now-playing', sectionId: '' }
+  }
+
+  if (cleaned === '/upcoming' || cleaned === 'upcoming') {
+    return { name: 'upcoming', sectionId: '' }
+  }
+
+  const sectionMatch = cleaned.match(/^\/#(.+)$/)
+  return {
+    name: 'home',
+    sectionId: sectionMatch ? sectionMatch[1] : '',
+  }
 }
 
-function formatFullDate(dateString) {
-  if (!dateString) return 'Tanggal rilis belum tersedia'
-  const parsed = new Date(`${dateString}T00:00:00`)
-  if (Number.isNaN(parsed.getTime())) return dateString
+function buildSearchHash(query, page = 1) {
+  const trimmed = query.trim()
+  if (!trimmed) return '#/search'
+  const params = new URLSearchParams({ q: trimmed })
+  if (page > 1) {
+    params.set('page', String(page))
+  }
+  return `#/search?${params.toString()}`
+}
 
-  return new Intl.DateTimeFormat('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(parsed)
+const ROUTE_HASH_MAP = {
+  home: '#/',
+  'now-playing': '#/now-playing',
+  upcoming: '#/upcoming',
+  search: '#/search',
 }
 
 function App() {
-  const [activePage, setActivePage] = useState(() =>
-    resolvePageFromHash(window.location.hash),
-  )
-  const [movies, setMovies] = useState([])
-  const [loading, setLoading] = useState(() => activePage === 'home')
-  const [error, setError] = useState('')
-  const [homeReloadToken, setHomeReloadToken] = useState(0)
-  const [selectedMovie, setSelectedMovie] = useState(null)
+  const [route, setRoute] = useState(() => parseHashRoute(window.location.hash))
 
   useEffect(() => {
     const handleHashChange = () => {
-      setActivePage(resolvePageFromHash(window.location.hash))
+      const nextRoute = parseHashRoute(window.location.hash)
+      setRoute(nextRoute)
+
+      if (nextRoute.sectionId) {
+        requestAnimationFrame(() => {
+          document
+            .getElementById(nextRoute.sectionId)
+            ?.scrollIntoView({ behavior: 'smooth' })
+        })
+      } else {
+        window.scrollTo({ top: 0 })
+      }
     }
 
     window.addEventListener('hashchange', handleHashChange)
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
 
-  useEffect(() => {
-    if (activePage !== 'home') return
-
-    let ignore = false
-
-    getPopularMovies()
-      .then((data) => {
-        if (ignore) return
-        setMovies(data.results || [])
-      })
-      .catch((err) => {
-        if (ignore) return
-        setError(err.message || 'Gagal memuat film.')
-      })
-      .finally(() => {
-        if (ignore) return
-        setLoading(false)
-      })
-
-    return () => {
-      ignore = true
-    }
-  }, [activePage, homeReloadToken])
-
-  useEffect(() => {
-    if (!selectedMovie) return
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setSelectedMovie(null)
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedMovie])
-
   const navigateTo = (pageId) => {
-    const targetHash = pageId === 'home' ? '#home' : `#${pageId}`
+    const targetHash = ROUTE_HASH_MAP[pageId] || '#/'
     if (window.location.hash !== targetHash) {
       window.location.hash = targetHash
+      return
     }
-    if (pageId === 'home' && movies.length === 0 && !error) {
-      setLoading(true)
-    }
-    setActivePage(pageId)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const handleRetryHome = () => {
-    setLoading(true)
-    setError('')
-    setHomeReloadToken((prev) => prev + 1)
+  const handleSearchNavigate = (query, page = 1) => {
+    window.location.hash = buildSearchHash(query, page)
   }
 
-  const featuredMovie = movies[0]
-  const displayedMovies = movies.slice(1, 13)
-  const featuredBackdrop = getImageUrl(featuredMovie?.backdrop_path, 'original')
-  const modalImage =
-    getImageUrl(selectedMovie?.backdrop_path, 'w780') ||
-    getImageUrl(selectedMovie?.poster_path, 'w500')
+  const handleSelectMovie = (movie) => {
+    if (!movie?.id) return
+    window.location.hash = `#/movie/${movie.id}`
+  }
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      window.history.back()
+      return
+    }
+    window.location.hash = '#/'
+  }
 
   return (
     <div className="app">
-      <Navbar activePage={activePage} onNavigate={navigateTo} />
+      <Navbar activePage={route.name} onNavigate={navigateTo} />
 
-      {activePage === 'now-playing' && (
-        <NowPlaying onSelectMovie={setSelectedMovie} />
+      {route.name === 'now-playing' && (
+        <NowPlaying onSelectMovie={handleSelectMovie} />
       )}
 
-      {activePage === 'upcoming' && (
-        <Upcoming onSelectMovie={setSelectedMovie} />
+      {route.name === 'upcoming' && (
+        <Upcoming onSelectMovie={handleSelectMovie} />
       )}
 
-      {activePage === 'home' && (
-        <>
-          {featuredMovie ? (
-            <section
-              className="hero"
-              style={{
-                backgroundImage: `linear-gradient(90deg, #111318 0%, rgba(17,19,24,0.94) 35%, rgba(17,19,24,0.35) 100%), linear-gradient(0deg, #111318 0%, transparent 40%), url('${featuredBackdrop}')`,
-              }}
-            >
-              <div className="hero-content">
-                <span className="hero-label">
-                  <span className="gold-dot"></span>
-                  POPULAR MOVIE
-                </span>
-
-                <h1>{featuredMovie.title}</h1>
-
-                <div className="hero-meta">
-                  <span className="rating">
-                    ★ {featuredMovie.vote_average?.toFixed(1)}
-                  </span>
-
-                  <span>
-                    {featuredMovie.release_date?.slice(0, 4) || 'Unknown'}
-                  </span>
-
-                  <span>Movie</span>
-                </div>
-
-                <p className="hero-description">
-                  {featuredMovie.overview ||
-                    'Discover this movie and explore more cinematic stories.'}
-                </p>
-
-                <div className="hero-buttons">
-                  <a href="#popular" className="button-primary">
-                    Explore Movies <span>→</span>
-                  </a>
-
-                  <button
-                    type="button"
-                    className="button-secondary"
-                    onClick={() => navigateTo('now-playing')}
-                  >
-                    Now Playing
-                  </button>
-                </div>
-              </div>
-
-              <div className="hero-side-label">
-                YOUR MOVIE DISCOVERY PLATFORM
-              </div>
-            </section>
-          ) : (
-            <section className="hero hero-fallback">
-              <div className="hero-content">
-                <span className="hero-label">PILEMQU MOVIE DISCOVERY</span>
-                <h1>Discover your next favorite movie.</h1>
-                <p className="hero-description">
-                  Explore movies, find new stories and discover your next favorite.
-                </p>
-              </div>
-            </section>
-          )}
-
-          <main className="main-content">
-            <section className="popular-section" id="popular">
-              <div className="section-heading">
-                <div>
-                  <span className="section-label">DISCOVER</span>
-                  <h2>Popular Movies</h2>
-                  <p>Explore movies everyone is talking about.</p>
-                </div>
-
-                <button
-                  type="button"
-                  className="view-all link-button"
-                  onClick={() => navigateTo('now-playing')}
-                >
-                  Now Playing <span>→</span>
-                </button>
-              </div>
-
-              <MovieList
-                movies={displayedMovies}
-                loading={loading}
-                error={error}
-                onRetry={handleRetryHome}
-                onSelectMovie={setSelectedMovie}
-              />
-            </section>
-
-            <section className="discovery-banner" id="genres">
-              <div>
-                <span className="section-label">YOUR NEXT STORY</span>
-                <h2>Every movie has a story. Find yours.</h2>
-                <p>
-                  Discover movies currently in theaters or coming soon to cinemas.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                className="button-primary"
-                onClick={() => navigateTo('upcoming')}
-              >
-                Lihat Upcoming <span>→</span>
-              </button>
-            </section>
-          </main>
-        </>
+      {route.name === 'search' && (
+        <Search
+          key={route.query}
+          query={route.query}
+          page={route.page}
+          onSearch={handleSearchNavigate}
+        />
       )}
+
+      {route.name === 'detail' && (
+        <MovieDetail
+          key={route.movieId}
+          movieId={route.movieId}
+          onBack={handleBack}
+        />
+      )}
+
+      {route.name === 'home' && <Home />}
 
       <footer className="footer">
         <a
-          href="#home"
+          href="#/"
           className="logo"
           onClick={(event) => {
             event.preventDefault()
@@ -245,60 +152,12 @@ function App() {
         <p>Your destination to discover movies.</p>
 
         <small>
-          This product uses the TMDB API but is not endorsed or certified by TMDB.
+          This product uses the TMDB API but is not endorsed or certified by
+          TMDB.
         </small>
 
         <small>© 2026 PilemQu. All rights reserved.</small>
       </footer>
-
-      {selectedMovie && (
-        <div
-          className="movie-modal-backdrop"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="movie-modal-title"
-          onClick={() => setSelectedMovie(null)}
-        >
-          <div
-            className="movie-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <button
-              type="button"
-              className="movie-modal-close"
-              aria-label="Tutup detail film"
-              onClick={() => setSelectedMovie(null)}
-            >
-              ×
-            </button>
-
-            {modalImage && (
-              <div className="movie-modal-banner">
-                <img src={modalImage} alt={selectedMovie.title} />
-              </div>
-            )}
-
-            <div className="movie-modal-body">
-              <span className="section-label">MOVIE PREVIEW</span>
-              <h2 id="movie-modal-title">{selectedMovie.title}</h2>
-
-              <div className="hero-meta">
-                <span className="rating">
-                  {selectedMovie.vote_average > 0
-                    ? `★ ${selectedMovie.vote_average.toFixed(1)}`
-                    : 'TBA'}
-                </span>
-                <span>{formatFullDate(selectedMovie.release_date)}</span>
-              </div>
-
-              <p className="movie-modal-overview">
-                {selectedMovie.overview ||
-                  'Sinopsis film belum tersedia pada bahasa yang dipilih.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

@@ -22,7 +22,8 @@ function formatReleaseDate(dateString, showFullDate) {
  */
 function MovieCard({ movie, showFullDate = false, onSelect }) {
   const posterUrl = getImageUrl(movie.poster_path, 'w500')
-  const hasRating = typeof movie.vote_average === 'number' && movie.vote_average > 0
+  const hasRating =
+    typeof movie.vote_average === 'number' && movie.vote_average > 0
   const formattedDate = formatReleaseDate(movie.release_date, showFullDate)
 
   const handleExplore = (event) => {
@@ -33,36 +34,38 @@ function MovieCard({ movie, showFullDate = false, onSelect }) {
 
   return (
     <article className="movie-card">
-      <div className="movie-poster">
-        {posterUrl ? (
-          <img src={posterUrl} alt={movie.title} loading="lazy" />
-        ) : (
-          <div className="poster-placeholder">No Poster Available</div>
-        )}
+      <a
+        href={`#/movie/${movie.id}`}
+        className="movie-card-link"
+        onClick={handleExplore}
+      >
+        <div className="movie-poster">
+          {posterUrl ? (
+            <img src={posterUrl} alt={movie.title} loading="lazy" />
+          ) : (
+            <div className="poster-placeholder">No Poster Available</div>
+          )}
 
-        <div className="poster-overlay">
-          <a
-            href={`#movie-${movie.id}`}
-            className="movie-explore"
-            onClick={handleExplore}
-          >
-            Explore Movie <span>↗</span>
-          </a>
+          <div className="poster-overlay">
+            <span className="movie-explore">
+              Lihat Detail <span>↗</span>
+            </span>
+          </div>
+
+          <div className="movie-rating">
+            {hasRating ? `★ ${movie.vote_average.toFixed(1)}` : 'TBA'}
+          </div>
         </div>
 
-        <div className="movie-rating">
-          {hasRating ? `★ ${movie.vote_average.toFixed(1)}` : 'TBA'}
+        <div className="movie-info">
+          <h3 title={movie.title}>{movie.title}</h3>
+          <div className="movie-meta">
+            <span>{formattedDate}</span>
+            <span className="meta-dot">•</span>
+            <span>Movie</span>
+          </div>
         </div>
-      </div>
-
-      <div className="movie-info">
-        <h3 title={movie.title}>{movie.title}</h3>
-        <div className="movie-meta">
-          <span>{formattedDate}</span>
-          <span className="meta-dot">•</span>
-          <span>Movie</span>
-        </div>
-      </div>
+      </a>
     </article>
   )
 }

@@ -1,7 +1,7 @@
 /**
  * Displays a centered loading spinner with a status label.
  */
-function Loading({ message = 'Discovering movies...' }) {
+function Loading({ message = 'Memuat data...' }) {
   return (
     <div className="status-message" role="status" aria-live="polite">
       <div className="loader" aria-hidden="true"></div>

@@ -1,13 +1,16 @@
 const NAV_ITEMS = [
-  { id: 'home', label: 'Home', href: '#home' },
-  { id: 'now-playing', label: 'Now Playing', href: '#now-playing' },
-  { id: 'upcoming', label: 'Upcoming', href: '#upcoming' },
+  { id: 'home', label: 'Home', href: '#/' },
+  { id: 'now-playing', label: 'Now Playing', href: '#/now-playing' },
+  { id: 'upcoming', label: 'Upcoming', href: '#/upcoming' },
+  { id: 'search', label: 'Search', href: '#/search' },
 ]
 
 /**
  * Top navigation bar shared across PilemQu pages.
  */
-function Navbar({ activePage, onNavigate }) {
+function Navbar({ activePage = 'home', currentRoute, onNavigate }) {
+  const activeKey = activePage || currentRoute || 'home'
+
   const handleNavClick = (event, pageId) => {
     if (!onNavigate) return
     event.preventDefault()
@@ -17,19 +20,19 @@ function Navbar({ activePage, onNavigate }) {
   return (
     <header className="navbar">
       <a
-        href="#home"
+        href="#/"
         className="logo"
         onClick={(event) => handleNavClick(event, 'home')}
       >
         Pilem<span>Qu.</span>
       </a>
 
-      <nav className="nav-links" aria-label="Main navigation">
+      <nav className="nav-links" aria-label="Navigasi Utama">
         {NAV_ITEMS.map((item) => (
           <a
             key={item.id}
             href={item.href}
-            className={activePage === item.id ? 'active' : ''}
+            className={activeKey === item.id ? 'active' : ''}
             onClick={(event) => handleNavClick(event, item.id)}
           >
             {item.label}
@@ -38,11 +41,11 @@ function Navbar({ activePage, onNavigate }) {
       </nav>
 
       <a
-        href="#now-playing"
-        className="nav-search"
-        onClick={(event) => handleNavClick(event, 'now-playing')}
+        href="#/search"
+        className={`nav-search ${activeKey === 'search' ? 'active' : ''}`}
+        onClick={(event) => handleNavClick(event, 'search')}
       >
-        <span>⌕</span> Explore
+        <span>⌕</span> Search
       </a>
     </header>
   )
