@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react'
 import { getPopularMovies } from './services/tmdb'
+import Genre from './pages/Genre'
 import './App.css'
 
 const IMAGE_BASE = 'https://image.tmdb.org/t/p/'
@@ -182,20 +183,7 @@ function App() {
           )}
         </section>
 
-        <section className="discovery-banner" id="genres">
-          <div>
-            <span className="section-label">YOUR NEXT STORY</span>
-            <h2>Every movie has a story. Find yours.</h2>
-            <p>
-              Discover movies across genres and find something
-              worth watching.
-            </p>
-          </div>
-
-          <a href="#popular" className="button-primary">
-            Start Exploring <span>→</span>
-          </a>
-        </section>
+        <Genre />
       </main>
 
       <footer className="footer" id="upcoming">
