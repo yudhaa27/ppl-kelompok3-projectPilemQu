@@ -18,7 +18,7 @@ function formatReleaseDate(dateString, showFullDate) {
 }
 
 /**
- * Renders an individual movie card with poster fallback, rating badge, and release metadata.
+ * Renders an individual movie card with poster fallback, metadata, and star rating below poster.
  */
 function MovieCard({
   movie,
@@ -63,10 +63,6 @@ function MovieCard({
               {actionLabel} <span>↗</span>
             </span>
           </div>
-
-          <div className="movie-rating">
-            {hasRating ? `★ ${movie.vote_average.toFixed(1)}` : 'TBA'}
-          </div>
         </div>
 
         <div className="movie-info">
@@ -75,6 +71,10 @@ function MovieCard({
             <span>{formattedDate}</span>
             <span className="meta-dot">•</span>
             <span>Movie</span>
+          </div>
+          <div className="movie-rating-row">
+            <span className="rating-star">★</span>
+            <span>{hasRating ? movie.vote_average.toFixed(1) : 'TBA'}</span>
           </div>
         </div>
       </a>

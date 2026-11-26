@@ -6,19 +6,9 @@ export const TMDB_IMAGE_BASE = IMAGE_BASE_URL
 
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 
-/**
- * Fetches JSON data from a TMDB v3 endpoint using the configured API key.
- * @param {string} endpoint - Relative TMDB endpoint path (e.g. '/movie/popular?page=1').
- * @param {object} [options] - Optional fetch options (e.g. AbortController signal).
- * @returns {Promise<object>} Parsed JSON response from TMDB.
- */
-async function fetchFromTMDB(endpoint, options = {}) {
-  if (!API_KEY) {
-    throw new Error('TMDB API Key belum dikonfigurasi. Pastikan VITE_TMDB_API_KEY ada di file .env')
-  }
-
+async function requestTMDB(endpoint, language, options = {}) {
   const separator = endpoint.includes('?') ? '&' : '?'
-  const url = `${BASE_URL}${endpoint}${separator}api_key=${API_KEY}&language=id-ID`
+  const url = `${BASE_URL}${endpoint}${separator}api_key=${API_KEY}&language=${language}`
 
   const response = await fetch(url, { signal: options.signal })
 
@@ -30,6 +20,57 @@ async function fetchFromTMDB(endpoint, options = {}) {
   }
 
   return response.json()
+}
+
+/**
+ * Fetches JSON data from a TMDB v3 endpoint using Indonesian overview with English/international titles.
+ * @param {string} endpoint - Relative TMDB endpoint path (e.g. '/movie/popular?page=1').
+ * @param {object} [options] - Optional fetch options (e.g. AbortController signal).
+ * @returns {Promise<object>} Parsed JSON response from TMDB.
+ */
+async function fetchFromTMDB(endpoint, options = {}) {
+  if (!API_KEY) {
+    throw new Error('TMDB API Key belum dikonfigurasi. Pastikan VITE_TMDB_API_KEY ada di file .env')
+  }
+
+  if (endpoint.startsWith('/genre/')) {
+    return requestTMDB(endpoint, 'id-ID', options)
+  }
+
+  const [idData, enData] = await Promise.all([
+    requestTMDB(endpoint, 'id-ID', options),
+    requestTMDB(endpoint, 'en-US', options).catch((err) => {
+      if (err.name === 'AbortError') throw err
+      return null
+    }),
+  ])
+
+  if (!enData) return idData
+
+  if (Array.isArray(idData?.results)) {
+    const enMap = new Map((enData.results || []).map((item) => [item.id, item]))
+    return {
+      ...idData,
+      results: idData.results.map((movie) => {
+        const enMovie = enMap.get(movie.id)
+        return {
+          ...movie,
+          title: enMovie?.title || movie.title,
+          overview: movie.overview || enMovie?.overview || '',
+        }
+      }),
+    }
+  }
+
+  if (idData?.id) {
+    return {
+      ...idData,
+      title: enData.title || idData.title,
+      overview: idData.overview || enData.overview || '',
+    }
+  }
+
+  return idData
 }
 
 /**
@@ -91,6 +132,17 @@ export function getMoviesByGenre(genreId, page = 1, options = {}) {
     `/discover/movie?with_genres=${genreId}&page=${page}&sort_by=popularity.desc`,
     options,
   )
+}
+
+// Discover movies with optional genre and release year filters
+export function discoverMovies({ genreId, year, page = 1 } = {}, options = {}) {
+  const params = new URLSearchParams({
+    page: String(page),
+    sort_by: 'popularity.desc',
+  })
+  if (genreId) params.set('with_genres', String(genreId))
+  if (year) params.set('primary_release_year', String(year))
+  return fetchFromTMDB(`/discover/movie?${params.toString()}`, options)
 }
 
 // FR-08: Movie recommendations based on movie ID

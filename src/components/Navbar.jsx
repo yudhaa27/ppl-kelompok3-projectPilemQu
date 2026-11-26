@@ -3,8 +3,7 @@ const NAV_ITEMS = [
   { id: 'now-playing', label: 'Now Playing', href: '#/now-playing' },
   { id: 'upcoming', label: 'Upcoming', href: '#/upcoming' },
   { id: 'top-rated', label: 'Top Rated', href: '#/top-rated' },
-  { id: 'genres', label: 'Genres', href: '#/genres' },
-  { id: 'search', label: 'Search', href: '#/search' },
+  { id: 'genres', label: 'Genre', href: '#/genres' },
 ]
 
 /**
@@ -26,7 +25,10 @@ function Navbar({ activePage = 'home', currentRoute, onNavigate }) {
         className="logo"
         onClick={(event) => handleNavClick(event, 'home')}
       >
-        Pilem<span>Qu.</span>
+        <span className="logo-badge" aria-hidden="true">
+          ◉
+        </span>
+        PILEM<span>QU</span>
       </a>
 
       <nav className="nav-links" aria-label="Navigasi Utama">
@@ -44,10 +46,24 @@ function Navbar({ activePage = 'home', currentRoute, onNavigate }) {
 
       <a
         href="#/search"
-        className={`nav-search ${activeKey === 'search' ? 'active' : ''}`}
+        className={`nav-search-icon ${activeKey === 'search' ? 'active' : ''}`}
+        aria-label="Cari Film"
         onClick={(event) => handleNavClick(event, 'search')}
       >
-        <span>⌕</span> Search
+        <svg
+          width="19"
+          height="19"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
       </a>
     </header>
   )
