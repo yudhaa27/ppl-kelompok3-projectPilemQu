@@ -160,25 +160,71 @@ function App() {
       {route.name === 'home' && <Home />}
 
       <footer className="footer">
-        <a
-          href="#/"
-          className="logo"
-          onClick={(event) => {
-            event.preventDefault()
-            navigateTo('home')
-          }}
-        >
-          Pilem<span>Qu.</span>
-        </a>
+        <div className="footer-top">
+          <a
+            href="#/"
+            className="logo"
+            onClick={(event) => {
+              event.preventDefault()
+              navigateTo('home')
+            }}
+          >
+            <span className="logo-badge" aria-hidden="true">
+              ◉
+            </span>
+            PILEM<span>QU</span>
+          </a>
 
-        <p>Your destination to discover movies.</p>
+          <nav className="footer-links" aria-label="Footer navigation">
+            <a
+              href="#/"
+              onClick={(event) => {
+                event.preventDefault()
+                navigateTo('home')
+              }}
+            >
+              Home
+            </a>
+            <a
+              href="#/now-playing"
+              onClick={(event) => {
+                event.preventDefault()
+                navigateTo('now-playing')
+              }}
+            >
+              Now Playing
+            </a>
+            <a
+              href="#/top-rated"
+              onClick={(event) => {
+                event.preventDefault()
+                navigateTo('top-rated')
+              }}
+            >
+              Top Rated
+            </a>
+            <a
+              href="#/genres"
+              onClick={(event) => {
+                event.preventDefault()
+                navigateTo('genres')
+              }}
+            >
+              Genres
+            </a>
+          </nav>
 
-        <small>
-          This product uses the TMDB API but is not endorsed or certified by
-          TMDB.
-        </small>
+          <small className="footer-tmdb">
+            Powered by TMDB API
+          </small>
+        </div>
 
-        <small>© 2026 PilemQu. All rights reserved.</small>
+        <div className="footer-bottom">
+          <small>
+            © 2026 PilemQu. All rights reserved. This product uses the TMDB API
+            but is not endorsed or certified by TMDB.
+          </small>
+        </div>
       </footer>
     </div>
   )
